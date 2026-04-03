@@ -1,3 +1,9 @@
+using DifferentialEquations
+using LinearAlgebra
+using Random
+using Statistics
+using Distributed
+
 # ------------------------------------------------------------
 # 1. KdV MODEL
 # ------------------------------------------------------------
