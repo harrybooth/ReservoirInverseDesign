@@ -662,6 +662,53 @@ function optimize_theta_and_readouts_BBO(
     return solve(optprob, alg; solve_kwargs...)
 end
 
+
+"""
+Wrapper for use with pmap = multiple parallel solves 
+"""
+
+function evaluate_gradient_surrogate_opt(fno,ps_cpu,st_cpu,lb_theta,ub_theta,x,p_soliton,dx,n_starts)
+
+    sol = optimize_theta_and_readouts(
+    fno,
+    ps_cpu,
+    st_cpu,
+    θ0,
+    xreadout0,
+    lb_theta,
+    ub_theta,
+    x,
+    p_soliton;
+    λ_rep = 1f-3,
+    sigma = 1.5 * dx,
+    nstarts = n_starts,
+    )
+
+    zbest = Array(sol.u)
+    θ_best = zbest[1:7]
+    xread_best = zbest[8:end]
+
+    R_true = true_readout_matrix(
+    θ_best,
+    xread_best,
+    x,
+    prob,
+    t_end,
+    p_soliton;
+    sigma = 1.5 * dx,
+    reltol = 1e-10,
+    abstol = 1e-10,
+    )
+
+    if size(R_true, 1) == size(R_true, 2)
+        surrogate_best_fitness = abs(det(R_true))
+    else
+        surrogate_best_fitness = det(R_true * R_true')
+    end
+
+    return θ_best,xread_best,surrogate_best_fitness
+end
+
 # ------------------------------------------------------------
 # 12. LINEAR READOUT FIT FOR VALIDATION
 #
