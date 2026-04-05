@@ -669,6 +669,12 @@ Wrapper for use with pmap = multiple parallel solves
 
 function evaluate_gradient_surrogate_opt(fno,ps_cpu,st_cpu,lb_theta,ub_theta,x,p_soliton,dx,n_starts)
 
+    n_readouts = 4
+
+    θ0 = [rand(Uniform(lb,ub)) for (lb,ub) in zip(lb_theta,ub_theta)]
+
+    xreadout0 = collect(range(-8.0, 8.0, length=n_readouts))
+
     sol = optimize_theta_and_readouts(
     fno,
     ps_cpu,
