@@ -525,7 +525,7 @@ function optimize_theta_and_readouts(
     p_soliton;
     maxiters = 300,
     λ_rep = 1f-3,
-    nstarts = 1,
+    nstarts = nothing,
     sigma = nothing,
 )
     @assert length(θ0) == 7
@@ -545,7 +545,11 @@ function optimize_theta_and_readouts(
     optf = OptimizationFunction(lossfun, AutoZygote())
     prob = OptimizationProblem(optf, z0; lb=lb, ub=ub)
 
-    return solve(prob,TikTak(nstarts), LBFGS(); maxiters=maxiters)
+    if nstarts !== nothing
+        return solve(prob,TikTak(nstarts), LBFGS(); maxiters=maxiters)
+    else
+        return solve(prob, LBFGS(); maxiters=maxiters)
+    end
 end
 
 """
@@ -591,7 +595,7 @@ function optimize_theta_and_readouts_BBO(
     meta_alg = false,
     callback = nothing,
     sort_readouts = true,
-    nthreads = 1)
+    nthreads = nothing)
 
     @assert length(θ0) == 7
     @assert length(lbθ) == 7
