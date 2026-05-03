@@ -73,7 +73,7 @@ end
         return sol.retcode,sol.u
     end
 
-    n_molecules = 1000
+    n_molecules = 5000
     toxic_threshold = Int(n_molecules /2)
     n_trials = 10
 
