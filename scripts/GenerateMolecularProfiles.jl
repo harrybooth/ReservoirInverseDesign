@@ -13,7 +13,7 @@ using SlurmClusterManager
 
 projectdir_static = dirname(Base.active_project())
 
-cluster_calc = false
+cluster_calc = true
 
 if !cluster_calc
     @quickactivate "ReservoirInverseDesign"
@@ -73,13 +73,9 @@ end
         return sol.retcode,sol.u
     end
 
-    # n_molecules = 1000
-    # toxic_threshold = Int(n_molecules /2)
-    # n_trials = 10
-
-    n_molecules = 2
+    n_molecules = 1000
     toxic_threshold = Int(n_molecules /2)
-    n_trials = 5
+    n_trials = 10
 
     delivery_noise = 1.
     θ = [0.05, 0.5,30]

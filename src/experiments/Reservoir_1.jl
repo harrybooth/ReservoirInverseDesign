@@ -1,23 +1,23 @@
 # ------------------------
 # Reservoir / PDE setup
 # ------------------------
-λ = 0.333
-N = 256
-L = 40.0
+const λ = 0.333
+const N = 256
+const L = 40.0
 
-x = range(-L/2, L/2, length=N)[1:end-1]
-dx = step(x)
+const x = range(-L/2, L/2, length=N)[1:end-1]
+const dx = step(x)
 
-p_reservoir = KdVParams(λ, dx, N - 1)
+const p_reservoir = KdVParams(λ, dx, N - 1)
 
-ks = 0.5
-U0 = 1.0
-p_soliton = SolitonParams(p_reservoir, ks, U0)
+const ks = 0.5
+const U0 = 1.0
+const p_soliton = SolitonParams(p_reservoir, ks, U0)
 
-u0_base = soliton(x, 0.0, p_soliton)
+const u0_base = soliton(x, 0.0, p_soliton)
+const t_end = 10.0
+
 prob = ODEProblem(kdv_fd!, u0_base, (0.0, 10.0), p_reservoir)
-
-t_end = 10.0
 
 
 # ------------------------
