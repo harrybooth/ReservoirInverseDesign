@@ -8,7 +8,10 @@
 /videos
 /plots
 /notebooks/old
+/notebooks/videos
+/notebooks/working
 /_research
+/presentations
 
 ################################################################################
 #                                    Julia                                     #

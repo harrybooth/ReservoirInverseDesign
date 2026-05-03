@@ -1,4 +1,6 @@
 using DifferentialEquations
+using OrdinaryDiffEq
+using OrdinaryDiffEqFIRK
 using LinearAlgebra
 using Random
 using Statistics
@@ -10,6 +12,12 @@ using Distributed
 
 struct KdVParams
     λ::Float64
+    dx::Float64
+    N::Int
+end
+
+struct KdVParamsE
+    λ::Vector{Float64}
     dx::Float64
     N::Int
 end
@@ -38,7 +46,7 @@ function Dxxx(u, dx)
     return d3u
 end
 
-function kdv_fd!(du, u, p, t)
+function kdv_fd!(du, u, p::KdVParams, t)
     @inbounds for i in 1:p.N
         du[i] = (-u[i] * (
             (-u[mod1(i+2,p.N)] + 8u[mod1(i+1,p.N)] - 8u[mod1(i-1,p.N)] + u[mod1(i-2,p.N)]) / (12p.dx)
@@ -49,6 +57,39 @@ function kdv_fd!(du, u, p, t)
     end
     return nothing
 end
+
+function kdv_fd!(du, u, p::KdVParamsE, t)
+    @inbounds for i in 1:p.N
+        ip1 = mod1(i + 1, p.N)
+        ip2 = mod1(i + 2, p.N)
+        ip3 = mod1(i + 3, p.N)
+        im1 = mod1(i - 1, p.N)
+        im2 = mod1(i - 2, p.N)
+        im3 = mod1(i - 3, p.N)
+
+        ux = (
+            -u[ip2] + 8u[ip1] - 8u[im1] + u[im2]
+        ) / (12p.dx)
+
+        uxx = (
+            -u[ip2] + 16u[ip1] - 30u[i] + 16u[im1] - u[im2]
+        ) / (12p.dx^2)
+
+        uxxx = (
+            -u[ip3] + 8u[ip2] - 13u[ip1] +
+             13u[im1] - 8u[im2] + u[im3]
+        ) / (8p.dx^3)
+
+        lambdax = (
+            -p.λ[ip2] + 8p.λ[ip1] - 8p.λ[im1] + p.λ[im2]
+        ) / (12p.dx)
+
+        du[i] = -u[i] * ux - lambdax * uxx - p.λ[i] * uxxx
+    end
+
+    return nothing
+end
+
 
 # ------------------------------------------------------------
 # 2. SOLITON / CNOIDAL BUILDING BLOCKS
@@ -108,6 +149,14 @@ function encode_initial_condition_7(xbits, xgrid, θ, p_soliton::SolitonParams)
     return soliton(xgrid, 0.0, p_soliton) .+
            cnoidal(xgrid, CnoidalParams(e1, k1, delta)) .+
            cnoidal(xgrid, CnoidalParams(e2, k2, delta))
+end
+
+function encode_initial_condition_single(xgrid, θ, p_soliton::SolitonParams)
+    @assert length(θ) == 3
+    e1,k1,delta = θ
+
+    return soliton(xgrid, 0.0, p_soliton) .+
+           cnoidal(xgrid, CnoidalParams(e1, k1, delta))
 end
 
 # ------------------------------------------------------------
